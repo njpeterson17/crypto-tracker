@@ -1,9 +1,33 @@
-// Bitcoin Price Tracker - Fetches 7-day and 365-day price history from CoinGecko API
+// Crypto Price Tracker - Fetches 7-day and 365-day price history from CoinGecko API
 
 const API_BASE_URL = 'https://api.coingecko.com/api/v3';
-const CACHE_KEY = 'btc_year_data';
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
-const CURRENCY_KEY = 'btc_currency';
+const CURRENCY_KEY = 'crypto_currency';
+const COIN_KEY = 'crypto_coin';
+
+// Coin configuration
+const COINS = {
+    bitcoin: {
+        id: 'bitcoin',
+        name: 'Bitcoin',
+        symbol: 'BTC',
+        color: '#F7931A',
+        logo: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="#F7931A" stroke-width="2"/>
+            <path d="M15.5 10.5c.2-1.4-.9-2.1-2.3-2.6l.5-1.9-1.2-.3-.4 1.9c-.3-.1-.6-.2-1-.3l.4-1.9-1.2-.3-.5 1.9c-.3-.1-.5-.2-.8-.3l-1.7-.4-.3 1.3s.9.2.9.2c.5.1.6.5.5.8l-.5 2.1c.1 0 .2 0 .3.1l-.3-.1-.8 3.1c-.1.2-.3.5-.7.4 0 0-.9-.2-.9-.2l-.6 1.3 1.6.4c.3.1.6.2.9.3l-.5 2 1.2.3.5-1.9c.3.1.6.2.9.3l-.5 1.9 1.2.3.5-2c1.9.4 3.4.2 4-1.5.4-1.2-.1-1.8-.9-2.2.6-.1 1.1-.5 1.3-1.3z" fill="#F7931A"/>
+        </svg>`
+    },
+    ethereum: {
+        id: 'ethereum',
+        name: 'Ethereum',
+        symbol: 'ETH',
+        color: '#627EEA',
+        logo: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 1.5L4.5 12.25L12 16.5L19.5 12.25L12 1.5Z" stroke="#627EEA" stroke-width="1.5" stroke-linejoin="round" fill="none"/>
+            <path d="M4.5 13.5L12 22.5L19.5 13.5L12 17.75L4.5 13.5Z" stroke="#627EEA" stroke-width="1.5" stroke-linejoin="round" fill="#627EEA" fill-opacity="0.3"/>
+        </svg>`
+    }
+};
 
 // DOM Elements
 const currentPriceEl = document.getElementById('currentPrice');
@@ -13,6 +37,9 @@ const yearCalendarEl = document.getElementById('yearCalendar');
 const yearStatsEl = document.getElementById('yearStats');
 const lastUpdatedEl = document.getElementById('lastUpdated');
 const currencySelectorEl = document.getElementById('currencySelector');
+const coinLogoEl = document.getElementById('coinLogo');
+const coinTitleEl = document.getElementById('coinTitle');
+const coinTabs = document.querySelectorAll('.coin-tab');
 
 // Currency configuration
 const CURRENCIES = {
@@ -20,6 +47,61 @@ const CURRENCIES = {
     eur: { code: 'eur', symbol: '€', locale: 'de-DE' },
     gbp: { code: 'gbp', symbol: '£', locale: 'en-GB' }
 };
+
+// Get current coin from localStorage or default to Bitcoin
+function getCurrentCoin() {
+    const saved = localStorage.getItem(COIN_KEY);
+    return COINS[saved] || COINS.bitcoin;
+}
+
+// Set coin and save to localStorage
+function setCoin(coinId) {
+    localStorage.setItem(COIN_KEY, coinId);
+    updateCoinUI();
+    init();
+}
+
+// Update UI elements for current coin
+function updateCoinUI() {
+    const coin = getCurrentCoin();
+
+    // Update logo
+    if (coinLogoEl) {
+        coinLogoEl.outerHTML = coin.logo.replace('<svg', `<svg id="coinLogo" aria-hidden="true"`);
+    }
+
+    // Update title
+    if (coinTitleEl) {
+        coinTitleEl.textContent = `${coin.name} Tracker`;
+        coinTitleEl.style.background = `linear-gradient(135deg, var(--text-primary) 0%, ${coin.color} 100%)`;
+        coinTitleEl.style.webkitBackgroundClip = 'text';
+        coinTitleEl.style.webkitTextFillColor = 'transparent';
+        coinTitleEl.style.backgroundClip = 'text';
+    }
+
+    // Update tab states
+    coinTabs.forEach(tab => {
+        const isActive = tab.dataset.coin === coin.id;
+        tab.classList.toggle('active', isActive);
+        tab.setAttribute('aria-selected', isActive);
+    });
+
+    // Update document title
+    document.title = `${coin.name} Price Tracker`;
+}
+
+// Initialize coin tabs
+function initCoinTabs() {
+    coinTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const coinId = tab.dataset.coin;
+            if (coinId && COINS[coinId]) {
+                setCoin(coinId);
+            }
+        });
+    });
+    updateCoinUI();
+}
 
 // Get current currency from localStorage or default to USD
 function getCurrentCurrency() {
@@ -108,16 +190,24 @@ async function fetchWithRetry(url, retries = 3, delay = 1000) {
     }
 }
 
-// Fetch Bitcoin price data for specified number of days
-async function fetchBitcoinData(days = 7) {
+// Fetch price data for specified coin and number of days
+async function fetchCoinData(days = 7) {
+    const coin = getCurrentCoin();
     const currency = getCurrentCurrency();
-    const url = `${API_BASE_URL}/coins/bitcoin/market_chart?vs_currency=${currency.code}&days=${days}&interval=daily`;
+    const url = `${API_BASE_URL}/coins/${coin.id}/market_chart?vs_currency=${currency.code}&days=${days}&interval=daily`;
     return await fetchWithRetry(url);
+}
+
+// Get cache key for current coin
+function getCacheKey() {
+    const coin = getCurrentCoin();
+    return `${coin.id}_year_data`;
 }
 
 // Get cached year data or fetch fresh
 async function getCachedYearData() {
-    const cached = localStorage.getItem(CACHE_KEY);
+    const cacheKey = getCacheKey();
+    const cached = localStorage.getItem(cacheKey);
     const currency = getCurrentCurrency();
 
     if (cached) {
@@ -136,10 +226,10 @@ async function getCachedYearData() {
     }
 
     console.log('Fetching fresh year data');
-    const data = await fetchBitcoinData(365);
+    const data = await fetchCoinData(365);
 
     // Cache the data
-    localStorage.setItem(CACHE_KEY, JSON.stringify({
+    localStorage.setItem(cacheKey, JSON.stringify({
         data,
         timestamp: Date.now(),
         currencyCode: currency.code
@@ -148,10 +238,11 @@ async function getCachedYearData() {
     return data;
 }
 
-// Fetch current Bitcoin price
+// Fetch current price
 async function fetchCurrentPrice() {
+    const coin = getCurrentCoin();
     const currency = getCurrentCurrency();
-    const url = `${API_BASE_URL}/simple/price?ids=bitcoin&vs_currencies=${currency.code}&include_24hr_change=true`;
+    const url = `${API_BASE_URL}/simple/price?ids=${coin.id}&vs_currencies=${currency.code}&include_24hr_change=true`;
     return await fetchWithRetry(url);
 }
 
@@ -319,7 +410,6 @@ function setupYearCalendarKeyboardNav() {
         const currentIndex = allDays.indexOf(current);
 
         let newIndex = currentIndex;
-        const cols = 53; // Grid has 53 columns (weeks)
 
         switch (e.key) {
             case 'ArrowRight':
@@ -331,7 +421,6 @@ function setupYearCalendarKeyboardNav() {
                 e.preventDefault();
                 break;
             case 'ArrowDown':
-                // Move down one row (7 days for weekly grid displayed vertically)
                 newIndex = Math.min(currentIndex + 7, allDays.length - 1);
                 e.preventDefault();
                 break;
@@ -359,9 +448,10 @@ function setupYearCalendarKeyboardNav() {
 function renderYearCalendar(priceData) {
     if (!yearCalendarEl) return;
 
+    const coin = getCurrentCoin();
     yearCalendarEl.innerHTML = '';
     yearCalendarEl.setAttribute('role', 'grid');
-    yearCalendarEl.setAttribute('aria-label', '365-day Bitcoin price history');
+    yearCalendarEl.setAttribute('aria-label', `365-day ${coin.name} price history`);
 
     const prices = priceData.prices;
     let upDays = 0;
@@ -413,9 +503,10 @@ function renderYearCalendar(priceData) {
 
 // Render the 7-day calendar
 function renderCalendar(priceData) {
+    const coin = getCurrentCoin();
     calendarGridEl.innerHTML = '';
     calendarGridEl.setAttribute('role', 'grid');
-    calendarGridEl.setAttribute('aria-label', '7-day Bitcoin price history');
+    calendarGridEl.setAttribute('aria-label', `7-day ${coin.name} price history`);
 
     const prices = priceData.prices;
 
@@ -437,10 +528,11 @@ function renderCalendar(priceData) {
 
 // Update current price display
 function updateCurrentPrice(currentData) {
+    const coin = getCurrentCoin();
     const currency = getCurrentCurrency();
-    const price = currentData.bitcoin[currency.code];
+    const price = currentData[coin.id][currency.code];
     const changeKey = `${currency.code}_24h_change`;
-    const change24h = currentData.bitcoin[changeKey];
+    const change24h = currentData[coin.id][changeKey];
 
     currentPriceEl.textContent = formatPrice(price);
 
@@ -460,11 +552,12 @@ function updateTimestamp() {
 async function init() {
     showLoading();
     initCurrencySelector();
+    initCoinTabs();
 
     try {
         // Fetch current price, 7-day data (always fresh), and year data (potentially cached)
         const [historicalData, yearData, currentData] = await Promise.all([
-            fetchBitcoinData(7),
+            fetchCoinData(7),
             getCachedYearData(),
             fetchCurrentPrice()
         ]);
@@ -476,7 +569,8 @@ async function init() {
 
     } catch (error) {
         console.error('Error initializing:', error);
-        showError('Failed to load Bitcoin data. Please try again later.');
+        const coin = getCurrentCoin();
+        showError(`Failed to load ${coin.name} data. Please try again later.`);
     }
 }
 
