@@ -36,6 +36,19 @@ body {
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
+/* Visually hidden but accessible */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 /* Header */
 header {
     display: flex;
@@ -44,6 +57,52 @@ header {
     margin-bottom: 40px;
     flex-wrap: wrap;
     gap: 20px;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* Currency Selector */
+.currency-selector {
+    display: flex;
+    align-items: center;
+}
+
+.currency-selector select {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a0a0b0' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+
+.currency-selector select:hover {
+    border-color: var(--accent-orange);
+}
+
+.currency-selector select:focus {
+    outline: none;
+    border-color: var(--accent-orange);
+    box-shadow: 0 0 0 3px rgba(247, 147, 26, 0.2);
+}
+
+.currency-selector select option {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .logo {
@@ -175,10 +234,16 @@ header {
     min-height: 6px;
 }
 
-.year-day:hover {
+.year-day:hover,
+.year-day:focus {
     transform: scale(1.3);
     z-index: 10;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.year-day:focus {
+    outline: 2px solid var(--accent-orange);
+    outline-offset: 1px;
 }
 
 .year-day.up {
@@ -221,7 +286,8 @@ header {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
-.year-day:hover::after {
+.year-day:hover::after,
+.year-day:focus::after {
     opacity: 1;
     visibility: visible;
 }
@@ -437,6 +503,11 @@ header {
     height: 200px;
 }
 
+.loading.year-loading {
+    grid-column: 1 / -1;
+    height: 120px;
+}
+
 .spinner {
     width: 40px;
     height: 40px;
@@ -507,6 +578,12 @@ footer a:hover {
         padding: 24px;
     }
 
+    .header-controls {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 12px;
+    }
+
     .calendar-grid {
         grid-template-columns: repeat(4, 1fr);
         gap: 8px;
@@ -530,6 +607,12 @@ footer a:hover {
 
     .current-price .price {
         font-size: 24px;
+    }
+
+    .currency-selector select {
+        padding: 8px 12px;
+        padding-right: 32px;
+        font-size: 13px;
     }
 }
 
