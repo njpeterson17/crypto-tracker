@@ -1,6 +1,7 @@
 // Crypto Price Tracker - Fetches 7-day and 365-day price history from CoinGecko API
 
 const API_BASE_URL = 'https://api.coingecko.com/api/v3';
+const API_KEY = 'CG-FpxpdXSB1x5b9tYF3K2546Vf'; // Free demo key
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 const CURRENCY_KEY = 'crypto_currency';
 const COIN_KEY = 'crypto_coin';
@@ -90,16 +91,20 @@ function updateCoinUI() {
     document.title = `${coin.name} Tracker`;
 }
 
-// Initialize coin tabs
+// Initialize coin tabs (call once on page load)
+let coinTabsInitialized = false;
 function initCoinTabs() {
-    coinTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const coinId = tab.dataset.coin;
-            if (coinId && COINS[coinId]) {
-                setCoin(coinId);
-            }
+    if (!coinTabsInitialized) {
+        coinTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const coinId = tab.dataset.coin;
+                if (coinId && COINS[coinId]) {
+                    setCoin(coinId);
+                }
+            });
         });
-    });
+        coinTabsInitialized = true;
+    }
     updateCoinUI();
 }
 
@@ -115,14 +120,18 @@ function setCurrency(currencyCode) {
     init();
 }
 
-// Initialize currency selector
+// Initialize currency selector (call once on page load)
+let currencySelectorInitialized = false;
 function initCurrencySelector() {
     if (!currencySelectorEl) return;
     const current = getCurrentCurrency();
     currencySelectorEl.value = current.code;
-    currencySelectorEl.addEventListener('change', (e) => {
-        setCurrency(e.target.value);
-    });
+    if (!currencySelectorInitialized) {
+        currencySelectorEl.addEventListener('change', (e) => {
+            setCurrency(e.target.value);
+        });
+        currencySelectorInitialized = true;
+    }
 }
 
 // Format price with currency
@@ -194,7 +203,7 @@ async function fetchWithRetry(url, retries = 3, delay = 1000) {
 async function fetchCoinData(days = 7) {
     const coin = getCurrentCoin();
     const currency = getCurrentCurrency();
-    const url = `${API_BASE_URL}/coins/${coin.id}/market_chart?vs_currency=${currency.code}&days=${days}&interval=daily`;
+    const url = `${API_BASE_URL}/coins/${coin.id}/market_chart?vs_currency=${currency.code}&days=${days}&interval=daily&x_cg_demo_api_key=${API_KEY}`;
     return await fetchWithRetry(url);
 }
 
@@ -242,7 +251,7 @@ async function getCachedYearData() {
 async function fetchCurrentPrice() {
     const coin = getCurrentCoin();
     const currency = getCurrentCurrency();
-    const url = `${API_BASE_URL}/simple/price?ids=${coin.id}&vs_currencies=${currency.code}&include_24hr_change=true`;
+    const url = `${API_BASE_URL}/simple/price?ids=${coin.id}&vs_currencies=${currency.code}&include_24hr_change=true&x_cg_demo_api_key=${API_KEY}`;
     return await fetchWithRetry(url);
 }
 
