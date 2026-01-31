@@ -1,0 +1,17 @@
+{
+  "name": "bitcoin-price-tracker",
+  "version": "1.0.0",
+  "description": "A sleek Bitcoin price tracker with 7-day calendar view",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve . -p 3000",
+    "deploy": "vercel --prod"
+  },
+  "keywords": ["bitcoin", "crypto", "price-tracker", "calendar"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.0.0"
+  }
+}

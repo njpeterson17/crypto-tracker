@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Price Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="#F7931A" stroke-width="2"/>
+                    <path d="M15.5 10.5c.2-1.4-.9-2.1-2.3-2.6l.5-1.9-1.2-.3-.4 1.9c-.3-.1-.6-.2-1-.3l.4-1.9-1.2-.3-.5 1.9c-.3-.1-.5-.2-.8-.3l-1.7-.4-.3 1.3s.9.2.9.2c.5.1.6.5.5.8l-.5 2.1c.1 0 .2 0 .3.1l-.3-.1-.8 3.1c-.1.2-.3.5-.7.4 0 0-.9-.2-.9-.2l-.6 1.3 1.6.4c.3.1.6.2.9.3l-.5 2 1.2.3.5-1.9c.3.1.6.2.9.3l-.5 1.9 1.2.3.5-2c1.9.4 3.4.2 4-1.5.4-1.2-.1-1.8-.9-2.2.6-.1 1.1-.5 1.3-1.3z" fill="#F7931A"/>
+                </svg>
+                <h1>Bitcoin Tracker</h1>
+            </div>
+            <div class="current-price">
+                <span class="label">Current Price</span>
+                <span class="price" id="currentPrice">Loading...</span>
+                <span class="change" id="priceChange">--</span>
+            </div>
+        </header>
+
+        <main>
+            <div class="calendar-section">
+                <h2>7-Day Price History</h2>
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar days will be inserted here by JavaScript -->
+                </div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <span class="dot up"></span>
+                    <span>Price Up</span>
+                </div>
+                <div class="legend-item">
+                    <span class="dot down"></span>
+                    <span>Price Down</span>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Data provided by <a href="https://www.coingecko.com" target="_blank">CoinGecko</a></p>
+            <p class="last-updated" id="lastUpdated">Last updated: --</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
