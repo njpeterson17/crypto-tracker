@@ -116,6 +116,8 @@ header {
     margin-top: 40px;
     padding-top: 40px;
     border-top: 1px solid var(--border-color);
+    width: 100%;
+    overflow: hidden;
 }
 
 .year-header {
@@ -125,6 +127,7 @@ header {
     flex-wrap: wrap;
     gap: 15px;
     margin-bottom: 20px;
+    padding: 0 5px;
 }
 
 .year-stats {
@@ -150,24 +153,23 @@ header {
 
 .year-calendar {
     display: grid;
-    grid-template-columns: repeat(53, 1fr);
+    grid-template-columns: repeat(53, minmax(6px, 1fr));
     gap: 2px;
-    padding: 15px;
+    padding: 12px;
     background: var(--bg-card);
     border-radius: 16px;
-    overflow-x: auto;
     max-width: 100%;
+    box-sizing: border-box;
 }
 
 .year-day {
     aspect-ratio: 1;
-    min-width: 8px;
-    max-width: 16px;
     border-radius: 2px;
     position: relative;
     cursor: pointer;
     transition: all 0.2s ease;
     overflow: hidden;
+    min-height: 6px;
 }
 
 .year-day:hover {
@@ -277,49 +279,37 @@ header {
     max-width: 90%;
 }
 
-/* Hide price text on small squares */
+/* Responsive year calendar */
 @media (max-width: 1200px) {
+    .year-calendar {
+        gap: 1.5px;
+        padding: 10px;
+    }
+    
     .year-day .price-corner {
         display: none;
     }
 }
 
-/* Responsive year calendar */
 @media (max-width: 900px) {
     .year-calendar {
-        gap: 2px;
-        padding: 12px;
+        gap: 1px;
+        padding: 8px;
     }
     
     .year-day {
-        min-width: 6px;
-        border-radius: 2px;
-    }
-    
-    .year-day .price-corner {
-        display: none;
+        border-radius: 1px;
     }
 }
 
 @media (max-width: 600px) {
     .year-calendar {
         gap: 1px;
-        padding: 10px;
-    }
-    
-    .year-day {
-        min-width: 5px;
-        border-radius: 1px;
-    }
-    
-    .year-stats {
-        width: 100%;
-        justify-content: center;
-        flex-wrap: wrap;
+        padding: 6px;
     }
     
     .year-day:hover {
-        transform: scale(1.5);
+        transform: scale(1.8);
     }
 }
 
