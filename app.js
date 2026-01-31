@@ -95,14 +95,19 @@ function updateCoinUI() {
 let coinTabsInitialized = false;
 function initCoinTabs() {
     if (!coinTabsInitialized) {
-        coinTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const coinId = tab.dataset.coin;
-                if (coinId && COINS[coinId]) {
-                    setCoin(coinId);
+        // Use event delegation on parent
+        const tabContainer = document.querySelector('.coin-tabs');
+        if (tabContainer) {
+            tabContainer.addEventListener('click', (e) => {
+                const tab = e.target.closest('.coin-tab');
+                if (tab) {
+                    const coinId = tab.dataset.coin;
+                    if (coinId && COINS[coinId]) {
+                        setCoin(coinId);
+                    }
                 }
             });
-        });
+        }
         coinTabsInitialized = true;
     }
     updateCoinUI();
